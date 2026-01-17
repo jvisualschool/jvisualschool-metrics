@@ -28,10 +28,10 @@ jobs:
           template: classic
           base: header, activity, community, repositories, metadata
           config_timezone: Asia/Seoul
-          filename: github-metrics.svg
+          filename: metrics.svg
           
           # Plugins
-          plugin_achievements: no
+          # Achievements disabled explicitly by removal
           plugin_isocalendar: yes
           plugin_isocalendar_duration: half-year
           
