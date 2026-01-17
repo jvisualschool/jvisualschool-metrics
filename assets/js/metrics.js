@@ -142,123 +142,16 @@ function renderStats(user, repos) {
 }
 
 function generateContributionCalendar(events) {
-    // Get last 6 months of dates
-    const today = new Date();
-    const sixMonthsAgo = new Date(today);
-    sixMonthsAgo.setMonth(today.getMonth() - 6);
-
-    // Count commits per day
-    const commitsByDate = {};
-    events.forEach(event => {
-        if (event.type === 'PushEvent') {
-            const date = new Date(event.created_at).toISOString().split('T')[0];
-            commitsByDate[date] = (commitsByDate[date] || 0) + (event.payload.commits?.length || 1);
-        }
-    });
-
-    // Generate calendar data - group by week
-    const weeks = [];
-    const currentDate = new Date(sixMonthsAgo);
-    let currentWeek = [];
-
-    while (currentDate <= today) {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const count = commitsByDate[dateStr] || 0;
-        let level = 0;
-        if (count > 0) level = 1;
-        if (count > 2) level = 2;
-        if (count > 5) level = 3;
-        if (count > 10) level = 4;
-
-        currentWeek.push({ date: dateStr, count, level });
-
-        if (currentWeek.length === 7) {
-            weeks.push(currentWeek);
-            currentWeek = [];
-        }
-
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    if (currentWeek.length > 0) {
-        weeks.push(currentWeek);
-    }
-
-    // Create isometric 3D visualization SVG
-    const width = 520;
-    const height = 180;
-    const blockSize = 6;
-
-    // Isometric projection helpers
-    const cos30 = Math.cos(Math.PI / 6);
-    const sin30 = Math.sin(Math.PI / 6);
-
-    const isoX = (x, y) => (x - y) * cos30 * blockSize;
-    const isoY = (x, y, z) => (x + y) * sin30 * blockSize - z * blockSize;
-
-    let svgParts = [];
-    svgParts.push(`<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="background: #0d1117; border-radius: 6px;">`);
-
-    // Draw blocks from back to front for proper layering
-    for (let weekIdx = weeks.length - 1; weekIdx >= 0; weekIdx--) {
-        const week = weeks[weekIdx];
-        for (let dayIdx = 0; dayIdx < week.length; dayIdx++) {
-            const day = week[dayIdx];
-            if (day.level === 0) continue;
-
-            const baseX = isoX(weekIdx, dayIdx) + width / 2;
-            const baseY = isoY(weekIdx, dayIdx, 0) + height - 40;
-
-            // Draw stack of blocks
-            for (let h = 0; h < day.level; h++) {
-                const z = h;
-                const bx = baseX;
-                const by = baseY - z * blockSize;
-
-                const colors = ['#0e4429', '#006d32', '#26a641', '#39d353'];
-                const baseColor = colors[Math.min(h, 3)];
-
-                // Simple color adjustment
-                const lighten = (col) => {
-                    const num = parseInt(col.slice(1), 16);
-                    const r = Math.min(255, ((num >> 16) & 0xff) + 40);
-                    const g = Math.min(255, ((num >> 8) & 0xff) + 40);
-                    const b = Math.min(255, (num & 0xff) + 40);
-                    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
-                };
-
-                const darken = (col) => {
-                    const num = parseInt(col.slice(1), 16);
-                    const r = Math.max(0, ((num >> 16) & 0xff) - 20);
-                    const g = Math.max(0, ((num >> 8) & 0xff) - 20);
-                    const b = Math.max(0, (num & 0xff) - 20);
-                    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
-                };
-
-                const topColor = lighten(baseColor);
-                const sideColor = darken(baseColor);
-
-                const dx = cos30 * blockSize;
-                const dy = sin30 * blockSize;
-
-                // Top face
-                svgParts.push(`<polygon points="${bx},${by - blockSize} ${bx + dx},${by - dy - blockSize} ${bx},${by - blockSize * 2} ${bx - dx},${by - dy - blockSize}" fill="${topColor}" stroke="#000" stroke-width="0.5" opacity="0.95"/>`);
-
-                // Left face
-                svgParts.push(`<polygon points="${bx},${by - blockSize} ${bx - dx},${by - dy - blockSize} ${bx - dx},${by + dy - blockSize} ${bx},${by}" fill="${baseColor}" stroke="#000" stroke-width="0.5" opacity="0.95"/>`);
-
-                // Right face
-                svgParts.push(`<polygon points="${bx},${by - blockSize} ${bx + dx},${by - dy - blockSize} ${bx + dx},${by + dy - blockSize} ${bx},${by}" fill="${sideColor}" stroke="#000" stroke-width="0.5" opacity="0.95"/>`);
-            }
-        }
-    }
-
-    svgParts.push('</svg>');
-
+    // Use the original GitHub-generated isometric calendar from the metrics SVG
     return `
         <div class="calendar-section">
             <div class="stats-section-title">📅 Contributions calendar</div>
-            <div class="calendar-3d">${svgParts.join('')}</div>
+            <div class="calendar-3d">
+                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/github-metrics.svg" 
+                     alt="Contribution Calendar" 
+                     style="width: 100%; max-width: 480px; border-radius: 6px;"
+                     onerror="this.parentElement.innerHTML='<p style=\\'color:#666;text-align:center;\\'>Calendar not available</p>';">
+            </div>
         </div>
     `;
 }
