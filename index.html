@@ -4,9 +4,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GitHub 3D Contributions Calendar (Mock)</title>
-    <meta name="description"
-        content="GitHub-style isometric 3D contributions calendar + 2D heatmap mock. Token-ready for GitHub GraphQL." />
+    <title>GitHub 3D Contributions Calendar (jvisualschool)</title>
+    <meta name="description" content="GitHub-style isometric 3D contributions calendar + 2D heatmap." />
+    <!-- Use CDN for Obelisk.js to ensure it loads correctly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/obelisk.js/1.2.2/obelisk.min.js"></script>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -107,10 +108,6 @@
             cursor: pointer;
         }
 
-        .btn:active {
-            transform: translateY(1px)
-        }
-
         .chart-container {
             display: grid;
             grid-template-columns: 1fr 280px;
@@ -119,7 +116,6 @@
             align-items: start;
         }
 
-        /* ===== Isometric 3D chart ===== */
         .iso-shell {
             position: relative;
             border: 1px solid var(--border);
@@ -139,12 +135,10 @@
             overflow: hidden;
         }
 
-        /* Obelisk canvas (jasonlong/isometric-contributions style) */
         #iso-canvas {
             background: transparent;
         }
 
-        /* Tooltip */
         .tooltip {
             position: absolute;
             pointer-events: none;
@@ -159,6 +153,7 @@
             white-space: nowrap;
             opacity: 0;
             transition: opacity .12s ease;
+            z-index: 100;
         }
 
         .tooltip .k {
@@ -167,7 +162,6 @@
             font-size: 11px
         }
 
-        /* ===== Stats panel ===== */
         .stats {
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -205,7 +199,6 @@
             color: var(--text-secondary)
         }
 
-        /* ===== 2D heatmap ===== */
         .heatmap-wrap {
             padding: 0 16px 16px
         }
@@ -263,7 +256,7 @@
         .months span {
             grid-row: 1;
             justify-self: start;
-            transform: translateX(-2px);
+            border: none;
         }
 
         .cells {
@@ -293,12 +286,6 @@
             color: var(--text-secondary);
         }
 
-        .legend .sw {
-            display: flex;
-            gap: 4px;
-            align-items: center
-        }
-
         .legend i {
             display: inline-block;
             width: 12px;
@@ -322,21 +309,6 @@
             text-decoration: none
         }
 
-        .footer a:hover {
-            text-decoration: underline
-        }
-
-        .toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .toggle input {
-            transform: translateY(1px)
-        }
-
-        /* responsive */
         @media (max-width: 900px) {
             .chart-container {
                 grid-template-columns: 1fr
@@ -346,549 +318,199 @@
                 position: relative;
                 top: auto
             }
-
-            .iso-world {
-                width: 520px
-            }
-        }
-
-        @media (max-width: 768px) {
-            .iso-shell {
-                display: none
-            }
-        }
-
-        /* reduce motion */
-        @media (prefers-reduced-motion: reduce) {
-            .bar {
-                animation: none;
-                opacity: 1;
-                transform: translate3d(var(--x), var(--y), 0) translateZ(var(--h))
-            }
         }
     </style>
 </head>
 
 <body>
     <div class="wrap">
-        <div class="card contribution-calendar" id="cc">
+        <div class="card contribution-calendar">
             <div class="header">
-                <h2 id="header-title">1,516 contributions in the last year</h2>
+                <h2 id="header-title">Loading...</h2>
                 <div class="controls">
-                    <div class="segmented" role="group" aria-label="View mode">
-                        <button id="btn-3d" aria-pressed="true" title="3D">3D</button>
-                        <button id="btn-2d" aria-pressed="false" title="Grid">Grid</button>
+                    <div class="segmented" role="group">
+                        <button id="btn-3d" aria-pressed="true">3D</button>
+                        <button id="btn-2d" aria-pressed="false">Grid</button>
                     </div>
-                    <button class="btn" id="btn-settings" type="button" aria-haspopup="menu"
-                        aria-expanded="false">Contribution settings ▾</button>
+                    <button class="btn" id="btn-settings">Contribution settings ▾</button>
                 </div>
             </div>
 
-            <div class="chart-container" id="main-area">
-                <div class="iso-shell" id="iso-shell" aria-label="Isometric contribution chart">
+            <div class="chart-container">
+                <div class="iso-shell" id="iso-shell">
                     <div class="iso-stage" id="iso-stage">
-                        <!-- Replaced: original CSS-isometric DOM bars -> obelisk.js canvas (as jasonlong/isometric-contributions) -->
                         <canvas id="iso-canvas" width="1000" height="600"
                             style="width:100%;height:100%;display:block"></canvas>
-                        <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+                        <div class="tooltip" id="tooltip"></div>
                     </div>
                 </div>
 
-                <aside class="stats" aria-label="Contribution statistics">
+                <aside class="stats">
                     <div class="block">
                         <div class="label">1 year total</div>
-                        <div class="big" id="stat-total">1,516</div>
-                        <div class="small" id="stat-range">Nov 6, 2025 — Jan 17, 2026</div>
+                        <div class="big" id="stat-total">-</div>
+                        <div class="small" id="stat-range">-</div>
                     </div>
                     <div class="block">
                         <div class="label">Busiest day</div>
-                        <div class="big" id="stat-busy">53</div>
-                        <div class="small" id="stat-busy-date">Mar 27</div>
+                        <div class="big" id="stat-busy">-</div>
+                        <div class="small" id="stat-busy-date">-</div>
                     </div>
                     <div class="block">
                         <div class="label">Longest streak</div>
-                        <div class="big" id="stat-long">16</div>
-                        <div class="small" id="stat-long-range">Feb 1 — Feb 16</div>
+                        <div class="big" id="stat-long">-</div>
+                        <div class="small" id="stat-long-range">-</div>
                     </div>
                     <div class="block">
                         <div class="label">Current streak</div>
-                        <div class="big" id="stat-cur">1</div>
-                        <div class="small" id="stat-cur-range">Nov 8 — Nov 8</div>
+                        <div class="big" id="stat-cur">-</div>
+                        <div class="small" id="stat-cur-range">-</div>
                     </div>
                 </aside>
             </div>
 
             <div class="heatmap-wrap" id="heatmap-wrap">
-                <div class="heatmap" aria-label="Contribution heatmap">
-                    <div class="heat-head">
-                        <div style="font-size:12px;color:var(--text-secondary)">
-                            Traditional contributions grid (GitHub-style)
-                        </div>
-                    </div>
-
+                <div class="heatmap">
                     <div class="heat-grid">
-                        <div class="dow" aria-hidden="true">
-                            <span></span>
-                            <span>Mon</span>
-                            <span></span>
-                            <span>Wed</span>
-                            <span></span>
-                            <span>Fri</span>
-                            <span></span>
+                        <div class="dow">
+                            <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
                         </div>
-
                         <div class="grid-area">
-                            <div class="months" id="months" aria-hidden="true"></div>
+                            <div class="months" id="months"></div>
                             <div class="cells" id="cells"></div>
-
-                            <div class="legend" aria-label="Legend">
+                            <div class="legend">
                                 <span>Less</span>
-                                <span class="sw" aria-hidden="true">
-                                    <i style="background:var(--green-0)"></i>
-                                    <i style="background:var(--green-1)"></i>
-                                    <i style="background:var(--green-2)"></i>
-                                    <i style="background:var(--green-3)"></i>
-                                    <i style="background:var(--green-4)"></i>
-                                </span>
+                                <i style="background:var(--green-0)"></i>
+                                <i style="background:var(--green-1)"></i>
+                                <i style="background:var(--green-2)"></i>
+                                <i style="background:var(--green-3)"></i>
+                                <i style="background:var(--green-4)"></i>
                                 <span>More</span>
                             </div>
                         </div>
                     </div>
-
                     <div class="footer">
-                        <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/managing-contribution-settings-on-your-profile"
-                            target="_blank" rel="noreferrer">Learn how we count contributions.</a>
-                        <label class="toggle" for="hide-normal">
-                            <input id="hide-normal" type="checkbox" />
-                            Hide normal chart
-                        </label>
+                        <a href="#">Learn how we count contributions.</a>
+                        <label><input id="hide-normal" type="checkbox" /> Hide normal chart</label>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <script src="vendor/isometric-contributions/src/obelisk.min.js"></script>
     <script>
-        // ========= isometric-contributions (jasonlong) integration (source reuse) =========
-        // Repo: https://github.com/jasonlong/isometric-contributions
-        // License: MIT https://github.com/jasonlong/isometric-contributions/blob/master/LICENSE
+        // Embedded Real Data (gh result)
+        const REAL_DATA = [{ "date": "2025-01-12", "count": 0 }, { "date": "2025-01-13", "count": 0 }, { "date": "2025-01-14", "count": 0 }, { "date": "2025-01-15", "count": 0 }, { "date": "2025-01-16", "count": 0 }, { "date": "2025-01-17", "count": 0 }, { "date": "2025-01-18", "count": 0 }, { "date": "2025-01-19", "count": 0 }, { "date": "2025-01-20", "count": 0 }, { "date": "2025-01-21", "count": 0 }, { "date": "2025-01-22", "count": 0 }, { "date": "2025-01-23", "count": 0 }, { "date": "2025-01-24", "count": 0 }, { "date": "2025-01-25", "count": 0 }, { "date": "2025-01-26", "count": 0 }, { "date": "2025-01-27", "count": 0 }, { "date": "2025-01-28", "count": 0 }, { "date": "2025-01-29", "count": 0 }, { "date": "2025-01-30", "count": 0 }, { "date": "2025-01-31", "count": 0 }, { "date": "2025-02-01", "count": 0 }, { "date": "2025-02-02", "count": 0 }, { "date": "2025-02-03", "count": 0 }, { "date": "2025-02-04", "count": 0 }, { "date": "2025-02-05", "count": 0 }, { "date": "2025-02-06", "count": 0 }, { "date": "2025-02-07", "count": 0 }, { "date": "2025-02-08", "count": 0 }, { "date": "2025-02-09", "count": 0 }, { "date": "2025-02-10", "count": 0 }, { "date": "2025-02-11", "count": 0 }, { "date": "2025-02-12", "count": 0 }, { "date": "2025-02-13", "count": 0 }, { "date": "2025-02-14", "count": 0 }, { "date": "2025-02-15", "count": 0 }, { "date": "2025-02-16", "count": 0 }, { "date": "2025-02-17", "count": 0 }, { "date": "2025-02-18", "count": 0 }, { "date": "2025-02-19", "count": 0 }, { "date": "2025-02-20", "count": 0 }, { "date": "2025-02-21", "count": 0 }, { "date": "2025-02-22", "count": 0 }, { "date": "2025-02-23", "count": 0 }, { "date": "2025-02-24", "count": 0 }, { "date": "2025-02-25", "count": 0 }, { "date": "2025-02-26", "count": 0 }, { "date": "2025-02-27", "count": 0 }, { "date": "2025-02-28", "count": 0 }, { "date": "2025-03-01", "count": 0 }, { "date": "2025-03-02", "count": 0 }, { "date": "2025-03-03", "count": 0 }, { "date": "2025-03-04", "count": 0 }, { "date": "2025-03-05", "count": 0 }, { "date": "2025-03-06", "count": 0 }, { "date": "2025-03-07", "count": 0 }, { "date": "2025-03-08", "count": 0 }, { "date": "2025-03-09", "count": 0 }, { "date": "2025-03-10", "count": 0 }, { "date": "2025-03-11", "count": 0 }, { "date": "2025-03-12", "count": 0 }, { "date": "2025-03-13", "count": 0 }, { "date": "2025-03-14", "count": 0 }, { "date": "2025-03-15", "count": 0 }, { "date": "2025-03-16", "count": 0 }, { "date": "2025-03-17", "count": 0 }, { "date": "2025-03-18", "count": 0 }, { "date": "2025-03-19", "count": 0 }, { "date": "2025-03-20", "count": 0 }, { "date": "2025-03-21", "count": 0 }, { "date": "2025-03-22", "count": 0 }, { "date": "2025-03-23", "count": 0 }, { "date": "2025-03-24", "count": 0 }, { "date": "2025-03-25", "count": 0 }, { "date": "2025-03-26", "count": 0 }, { "date": "2025-03-27", "count": 0 }, { "date": "2025-03-28", "count": 0 }, { "date": "2025-03-29", "count": 0 }, { "date": "2025-03-30", "count": 0 }, { "date": "2025-03-31", "count": 0 }, { "date": "2025-04-01", "count": 0 }, { "date": "2025-04-02", "count": 0 }, { "date": "2025-04-03", "count": 0 }, { "date": "2025-04-04", "count": 0 }, { "date": "2025-04-05", "count": 0 }, { "date": "2025-04-06", "count": 0 }, { "date": "2025-04-07", "count": 0 }, { "date": "2025-04-08", "count": 0 }, { "date": "2025-04-09", "count": 0 }, { "date": "2025-04-10", "count": 0 }, { "date": "2025-04-11", "count": 0 }, { "date": "2025-04-12", "count": 0 }, { "date": "2025-04-13", "count": 0 }, { "date": "2025-04-14", "count": 0 }, { "date": "2025-04-15", "count": 0 }, { "date": "2025-04-16", "count": 0 }, { "date": "2025-04-17", "count": 0 }, { "date": "2025-04-18", "count": 0 }, { "date": "2025-04-19", "count": 0 }, { "date": "2025-04-20", "count": 0 }, { "date": "2025-04-21", "count": 0 }, { "date": "2025-04-22", "count": 0 }, { "date": "2025-04-23", "count": 0 }, { "date": "2025-04-24", "count": 0 }, { "date": "2025-04-25", "count": 0 }, { "date": "2025-04-26", "count": 0 }, { "date": "2025-04-27", "count": 0 }, { "date": "2025-04-28", "count": 0 }, { "date": "2025-04-29", "count": 0 }, { "date": "2025-04-30", "count": 0 }, { "date": "2025-05-01", "count": 0 }, { "date": "2025-05-02", "count": 0 }, { "date": "2025-05-03", "count": 0 }, { "date": "2025-05-04", "count": 0 }, { "date": "2025-05-05", "count": 0 }, { "date": "2025-05-06", "count": 0 }, { "date": "2025-05-07", "count": 0 }, { "date": "2025-05-08", "count": 0 }, { "date": "2025-05-09", "count": 0 }, { "date": "2025-05-10", "count": 0 }, { "date": "2025-05-11", "count": 0 }, { "date": "2025-05-12", "count": 0 }, { "date": "2025-05-13", "count": 0 }, { "date": "2025-05-14", "count": 0 }, { "date": "2025-05-15", "count": 0 }, { "date": "2025-05-16", "count": 0 }, { "date": "2025-05-17", "count": 0 }, { "date": "2025-05-18", "count": 0 }, { "date": "2025-05-19", "count": 0 }, { "date": "2025-05-20", "count": 0 }, { "date": "2025-05-21", "count": 0 }, { "date": "2025-05-22", "count": 0 }, { "date": "2025-05-23", "count": 0 }, { "date": "2025-05-24", "count": 0 }, { "date": "2025-05-25", "count": 0 }, { "date": "2025-05-26", "count": 0 }, { "date": "2025-05-27", "count": 0 }, { "date": "2025-05-28", "count": 0 }, { "date": "2025-05-29", "count": 0 }, { "date": "2025-05-30", "count": 0 }, { "date": "2025-05-31", "count": 0 }, { "date": "2025-06-01", "count": 0 }, { "date": "2025-06-02", "count": 0 }, { "date": "2025-06-03", "count": 0 }, { "date": "2025-06-04", "count": 0 }, { "date": "2025-06-05", "count": 0 }, { "date": "2025-06-06", "count": 0 }, { "date": "2025-06-07", "count": 0 }, { "date": "2025-06-08", "count": 0 }, { "date": "2025-06-09", "count": 0 }, { "date": "2025-06-10", "count": 0 }, { "date": "2025-06-11", "count": 0 }, { "date": "2025-06-12", "count": 0 }, { "date": "2025-06-13", "count": 0 }, { "date": "2025-06-14", "count": 0 }, { "date": "2025-06-15", "count": 0 }, { "date": "2025-06-16", "count": 0 }, { "date": "2025-06-17", "count": 0 }, { "date": "2025-06-18", "count": 6 }, { "date": "2025-06-19", "count": 0 }, { "date": "2025-06-20", "count": 0 }, { "date": "2025-06-21", "count": 0 }, { "date": "2025-06-22", "count": 0 }, { "date": "2025-06-23", "count": 0 }, { "date": "2025-06-24", "count": 0 }, { "date": "2025-06-25", "count": 0 }, { "date": "2025-06-26", "count": 0 }, { "date": "2025-06-27", "count": 0 }, { "date": "2025-06-28", "count": 2 }, { "date": "2025-06-29", "count": 3 }, { "date": "2025-06-30", "count": 0 }, { "date": "2025-07-01", "count": 0 }, { "date": "2025-07-02", "count": 0 }, { "date": "2025-07-03", "count": 0 }, { "date": "2025-07-04", "count": 0 }, { "date": "2025-07-05", "count": 0 }, { "date": "2025-07-06", "count": 0 }, { "date": "2025-07-07", "count": 0 }, { "date": "2025-07-08", "count": 0 }, { "date": "2025-07-09", "count": 0 }, { "date": "2025-07-10", "count": 3 }, { "date": "2025-07-11", "count": 0 }, { "date": "2025-07-12", "count": 1 }, { "date": "2025-07-13", "count": 0 }, { "date": "2025-07-14", "count": 0 }, { "date": "2025-07-15", "count": 0 }, { "date": "2025-07-16", "count": 0 }, { "date": "2025-07-17", "count": 0 }, { "date": "2025-07-18", "count": 0 }, { "date": "2025-07-19", "count": 0 }, { "date": "2025-07-20", "count": 11 }, { "date": "2025-07-21", "count": 0 }, { "date": "2025-07-22", "count": 10 }, { "date": "2025-07-23", "count": 7 }, { "date": "2025-07-24", "count": 0 }, { "date": "2025-07-25", "count": 0 }, { "date": "2025-07-26", "count": 0 }, { "date": "2025-07-27", "count": 4 }, { "date": "2025-07-28", "count": 0 }, { "date": "2025-07-29", "count": 1 }, { "date": "2025-07-30", "count": 7 }, { "date": "2025-07-31", "count": 7 }, { "date": "2025-08-01", "count": 0 }, { "date": "2025-08-02", "count": 7 }, { "date": "2025-08-03", "count": 0 }, { "date": "2025-08-04", "count": 0 }, { "date": "2025-08-05", "count": 3 }, { "date": "2025-08-06", "count": 0 }, { "date": "2025-08-07", "count": 6 }, { "date": "2025-08-08", "count": 0 }, { "date": "2025-08-09", "count": 3 }, { "date": "2025-08-10", "count": 0 }, { "date": "2025-08-11", "count": 0 }, { "date": "2025-08-12", "count": 1 }, { "date": "2025-08-13", "count": 1 }, { "date": "2025-08-14", "count": 0 }, { "date": "2025-08-15", "count": 3 }, { "date": "2025-08-16", "count": 0 }, { "date": "2025-08-17", "count": 0 }, { "date": "2025-08-18", "count": 5 }, { "date": "2025-08-19", "count": 0 }, { "date": "2025-08-20", "count": 0 }, { "date": "2025-08-21", "count": 0 }, { "date": "2025-08-22", "count": 0 }, { "date": "2025-08-23", "count": 0 }, { "date": "2025-08-24", "count": 0 }, { "date": "2025-08-25", "count": 0 }, { "date": "2025-08-26", "count": 3 }, { "date": "2025-08-27", "count": 0 }, { "date": "2025-08-28", "count": 0 }, { "date": "2025-08-29", "count": 0 }, { "date": "2025-08-30", "count": 0 }, { "date": "2025-08-31", "count": 3 }, { "date": "2025-09-01", "count": 0 }, { "date": "2025-09-02", "count": 0 }, { "date": "2025-09-03", "count": 0 }, { "date": "2025-09-04", "count": 0 }, { "date": "2025-09-05", "count": 0 }, { "date": "2025-09-06", "count": 0 }, { "date": "2025-09-07", "count": 0 }, { "date": "2025-09-08", "count": 0 }, { "date": "2025-09-09", "count": 0 }, { "date": "2025-09-10", "count": 0 }, { "date": "2025-09-11", "count": 0 }, { "date": "2025-09-12", "count": 6 }, { "date": "2025-09-13", "count": 0 }, { "date": "2025-09-14", "count": 0 }, { "date": "2025-09-15", "count": 0 }, { "date": "2025-09-16", "count": 0 }, { "date": "2025-09-17", "count": 0 }, { "date": "2025-09-18", "count": 0 }, { "date": "2025-09-19", "count": 0 }, { "date": "2025-09-20", "count": 0 }, { "date": "2025-09-21", "count": 0 }, { "date": "2025-09-22", "count": 0 }, { "date": "2025-09-23", "count": 0 }, { "date": "2025-09-24", "count": 0 }, { "date": "2025-09-25", "count": 0 }, { "date": "2025-09-26", "count": 0 }, { "date": "2025-09-27", "count": 0 }, { "date": "2025-09-28", "count": 0 }, { "date": "2025-09-29", "count": 0 }, { "date": "2025-09-30", "count": 0 }, { "date": "2025-10-01", "count": 0 }, { "date": "2025-10-02", "count": 0 }, { "date": "2025-10-03", "count": 0 }, { "date": "2025-10-04", "count": 0 }, { "date": "2025-10-05", "count": 0 }, { "date": "2025-10-06", "count": 0 }, { "date": "2025-10-07", "count": 0 }, { "date": "2025-10-08", "count": 0 }, { "date": "2025-10-09", "count": 0 }, { "date": "2025-10-10", "count": 0 }, { "date": "2025-10-11", "count": 0 }, { "date": "2025-10-12", "count": 0 }, { "date": "2025-10-13", "count": 0 }, { "date": "2025-10-14", "count": 0 }, { "date": "2025-10-15", "count": 0 }, { "date": "2025-10-16", "count": 0 }, { "date": "2025-10-17", "count": 0 }, { "date": "2025-10-18", "count": 0 }, { "date": "2025-10-19", "count": 0 }, { "date": "2025-10-20", "count": 0 }, { "date": "2025-10-21", "count": 0 }, { "date": "2025-10-22", "count": 0 }, { "date": "2025-10-23", "count": 0 }, { "date": "2025-10-24", "count": 0 }, { "date": "2025-10-25", "count": 0 }, { "date": "2025-10-26", "count": 0 }, { "date": "2025-10-27", "count": 0 }, { "date": "2025-10-28", "count": 0 }, { "date": "2025-10-29", "count": 0 }, { "date": "2025-10-30", "count": 0 }, { "date": "2025-10-31", "count": 0 }, { "date": "2025-11-01", "count": 0 }, { "date": "2025-11-02", "count": 0 }, { "date": "2025-11-03", "count": 0 }, { "date": "2025-11-04", "count": 0 }, { "date": "2025-11-05", "count": 0 }, { "date": "2025-11-06", "count": 0 }, { "date": "2025-11-07", "count": 0 }, { "date": "2025-11-08", "count": 0 }, { "date": "2025-11-09", "count": 0 }, { "date": "2025-11-10", "count": 0 }, { "date": "2025-11-11", "count": 0 }, { "date": "2025-11-12", "count": 0 }, { "date": "2025-11-13", "count": 0 }, { "date": "2025-11-14", "count": 0 }, { "date": "2025-11-15", "count": 0 }, { "date": "2025-11-16", "count": 0 }, { "date": "2025-11-17", "count": 0 }, { "date": "2025-11-18", "count": 0 }, { "date": "2025-11-19", "count": 0 }, { "date": "2025-11-20", "count": 0 }, { "date": "2025-11-21", "count": 0 }, { "date": "2025-11-22", "count": 0 }, { "date": "2025-11-23", "count": 0 }, { "date": "2025-11-24", "count": 0 }, { "date": "2025-11-25", "count": 0 }, { "date": "2025-11-26", "count": 0 }, { "date": "2025-11-27", "count": 0 }, { "date": "2025-11-28", "count": 0 }, { "date": "2025-11-29", "count": 0 }, { "date": "2025-11-30", "count": 0 }, { "date": "2025-12-01", "count": 0 }, { "date": "2025-12-02", "count": 0 }, { "date": "2025-12-03", "count": 0 }, { "date": "2025-12-04", "count": 0 }, { "date": "2025-12-05", "count": 0 }, { "date": "2025-12-06", "count": 0 }, { "date": "2025-12-07", "count": 0 }, { "date": "2025-12-08", "count": 0 }, { "date": "2025-12-09", "count": 0 }, { "date": "2025-12-10", "count": 0 }, { "date": "2025-12-11", "count": 0 }, { "date": "2025-12-12", "count": 0 }, { "date": "2025-12-13", "count": 0 }, { "date": "2025-12-14", "count": 0 }, { "date": "2025-12-15", "count": 2 }, { "date": "2025-12-16", "count": 1 }, { "date": "2025-12-17", "count": 0 }, { "date": "2025-12-18", "count": 1 }, { "date": "2025-12-19", "count": 0 }, { "date": "2025-12-20", "count": 0 }, { "date": "2025-12-21", "count": 0 }, { "date": "2025-12-22", "count": 0 }, { "date": "2025-12-23", "count": 0 }, { "date": "2025-12-24", "count": 4 }, { "date": "2025-12-25", "count": 0 }, { "date": "2025-12-26", "count": 0 }, { "date": "2025-12-27", "count": 6 }, { "date": "2025-12-28", "count": 2 }, { "date": "2025-12-29", "count": 3 }, { "date": "2025-12-30", "count": 5 }, { "date": "2025-12-31", "count": 1 }, { "date": "2026-01-01", "count": 4 }, { "date": "2026-01-02", "count": 1 }, { "date": "2026-01-03", "count": 3 }, { "date": "2026-01-04", "count": 2 }, { "date": "2026-01-05", "count": 2 }, { "date": "2026-01-06", "count": 3 }, { "date": "2026-01-07", "count": 0 }, { "date": "2026-01-08", "count": 1 }, { "date": "2026-01-09", "count": 3 }, { "date": "2026-01-10", "count": 0 }, { "date": "2026-01-11", "count": 0 }, { "date": "2026-01-12", "count": 0 }, { "date": "2026-01-13", "count": 0 }, { "date": "2026-01-14", "count": 0 }, { "date": "2026-01-15", "count": 0 }, { "date": "2026-01-16", "count": 1 }, { "date": "2026-01-17", "count": 1 }];
 
-        const fmt = new Intl.NumberFormat('en-US');
         const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        function formatDateHuman(iso) {
+        function fmt(n) { return new Intl.NumberFormat('en-US').format(n); }
+        function fmtDate(iso) {
             const d = new Date(iso + 'T00:00:00');
-            return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-        }
-
-        function getCss(varName) {
-            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            return `${MONTHS[d.getMonth()]} ${d.getDate()}${d.getFullYear() !== new Date().getFullYear() ? ', ' + d.getFullYear() : ''}`;
         }
 
         function colorForCount(count) {
-            if (count <= 0) return getCss('--green-0');
-            if (count <= 3) return getCss('--green-1');
-            if (count <= 6) return getCss('--green-2');
-            if (count <= 9) return getCss('--green-3');
-            return getCss('--green-4');
+            if (count <= 0) return '#EBEDF0';
+            if (count <= 3) return '#9BE9A8';
+            if (count <= 6) return '#40C463';
+            if (count <= 9) return '#30A14E';
+            return '#216E39';
         }
 
-        function precisionRound(number, precision) {
-            const factor = 10 ** precision;
-            return Math.round(number * factor) / factor;
-        }
-
-        function datesDayDifference(date1, date2) {
-            if (!date1 || !date2) return null;
-            const timeDiff = Math.abs(date2.getTime() - date1.getTime());
-            return Math.ceil(timeDiff / (1000 * 3600 * 24));
-        }
-
-        // Placeholder generator: returns 365 days ending today (local) with random counts.
-        function generateContributionData() {
-            const data = [];
-            const end = new Date();
-            end.setHours(0, 0, 0, 0);
-            const start = new Date(end);
-            start.setDate(start.getDate() - 364);
-
-            for (let i = 0; i < 365; i++) {
-                const d = new Date(start);
-                d.setDate(start.getDate() + i);
-                const iso = d.toISOString().slice(0, 10);
-                const r = Math.random();
-                let count = 0;
-                if (r > 0.35 && r <= 0.75) count = 1 + Math.floor(Math.random() * 3);
-                else if (r > 0.75 && r <= 0.92) count = 4 + Math.floor(Math.random() * 3);
-                else if (r > 0.92 && r <= 0.98) count = 7 + Math.floor(Math.random() * 3);
-                else if (r > 0.98) count = 10 + Math.floor(Math.random() * 8);
-                data.push({ date: iso, count });
-            }
-            return data;
-        }
-
-        // ===== Stats (compatible with GitHub-like streak logic) =====
         function calcStats(days) {
             const total = days.reduce((s, d) => s + d.count, 0);
             let busiest = days[0];
             for (const d of days) { if (d.count > busiest.count) busiest = d; }
 
-            // Longest streak (count>0)
-            let bestLen = 0, bestStart = null, bestEnd = null;
-            let curLen = 0, curStart = null;
-            for (let i = 0; i < days.length; i++) {
-                if (days[i].count > 0) {
-                    if (curLen === 0) curStart = days[i].date;
+            let bestLen = 0, bestStart = null, bestEnd = null, curLen = 0, curStart = null;
+            days.forEach(d => {
+                if (d.count > 0) {
+                    if (curLen === 0) curStart = d.date;
                     curLen++;
-                    if (curLen >= bestLen) {
-                        bestLen = curLen;
-                        bestStart = curStart;
-                        bestEnd = days[i].date;
-                    }
-                } else {
-                    curLen = 0;
-                    curStart = null;
-                }
-            }
+                    if (curLen >= bestLen) { bestLen = curLen; bestStart = curStart; bestEnd = d.date; }
+                } else { curLen = 0; }
+            });
 
-            // Current streak: from end backwards (if today 0, allow yesterday)
             let currentLen = 0;
-            let curEnd = days[days.length - 1].date;
-            let curStreakStart = curEnd;
             for (let i = days.length - 1; i >= 0; i--) {
-                if (i === days.length - 1 && days[i].count === 0) {
-                    // today 0 → start from yesterday
-                    curEnd = days[Math.max(0, i - 1)].date;
-                    continue;
-                }
-                if (days[i].count > 0) {
-                    currentLen++;
-                    curStreakStart = days[i].date;
-                } else break;
+                if (days[i].count > 0) currentLen++;
+                else if (i < days.length - 1) break;
             }
 
-            return {
-                total,
-                rangeStart: days[0].date,
-                rangeEnd: days[days.length - 1].date,
-                busiest,
-                longest: { len: bestLen, start: bestStart, end: bestEnd },
-                current: { len: currentLen, start: curStreakStart, end: curEnd }
-            };
+            return { total, busiest, longest: { len: bestLen, start: bestStart, end: bestEnd }, current: { len: currentLen }, range: [days[0].date, days[days.length - 1].date] };
         }
 
-        function applyStats(stats) {
-            document.getElementById('header-title').textContent = `${fmt.format(stats.total)} contributions in the last year`;
-            document.getElementById('stat-total').textContent = fmt.format(stats.total);
-
-            const rs = new Date(stats.rangeStart + 'T00:00:00');
-            const re = new Date(stats.rangeEnd + 'T00:00:00');
-            document.getElementById('stat-range').textContent = `${MONTHS[rs.getMonth()]} ${rs.getDate()}, ${rs.getFullYear()} — ${MONTHS[re.getMonth()]} ${re.getDate()}, ${re.getFullYear()}`;
-
-            document.getElementById('stat-busy').textContent = String(stats.busiest.count);
-            const bd = new Date(stats.busiest.date + 'T00:00:00');
-            document.getElementById('stat-busy-date').textContent = `${MONTHS[bd.getMonth()]} ${bd.getDate()}`;
-
-            document.getElementById('stat-long').textContent = String(stats.longest.len);
-            if (stats.longest.start && stats.longest.end) {
-                const ls = new Date(stats.longest.start + 'T00:00:00');
-                const le = new Date(stats.longest.end + 'T00:00:00');
-                document.getElementById('stat-long-range').textContent = `${MONTHS[ls.getMonth()]} ${ls.getDate()} — ${MONTHS[le.getMonth()]} ${le.getDate()}`;
-            }
-
-            document.getElementById('stat-cur').textContent = String(stats.current.len);
-            const cs = new Date(stats.current.start + 'T00:00:00');
-            const ce = new Date(stats.current.end + 'T00:00:00');
-            document.getElementById('stat-cur-range').textContent = `${MONTHS[cs.getMonth()]} ${cs.getDate()} — ${MONTHS[ce.getMonth()]} ${ce.getDate()}`;
-        }
-
-        // ===== Render 3D with obelisk.js (as original project does) =====
-        function renderIsometricObelisk(days) {
-            // Build weeks like GitHub: padded to full weeks, week index by column.
-            const first = new Date(days[0].date + 'T00:00:00');
-            const pad = first.getDay(); // Sunday=0
-            const padded = Array.from({ length: pad }, () => ({ date: null, count: 0, pad: true })).concat(days);
-            const totalSlots = Math.ceil(padded.length / 7) * 7;
-            while (padded.length < totalSlots) padded.push({ date: null, count: 0, pad: true });
-            const weeks = totalSlots / 7;
-
-            // Determine maxCount for scaling
-            let maxCount = 0;
-            for (const d of days) maxCount = Math.max(maxCount, d.count);
-
-            // Map count -> GitHub greens (use our CSS vars) but obelisk wants int color.
-            const hexToInt = (hex) => Number.parseInt(hex.replace('#', ''), 16);
-            const fillColorFor = (count) => hexToInt(colorForCount(count));
-
-            // Setup canvas
-            const canvas = document.getElementById('iso-canvas');
-            const stage = document.getElementById('iso-stage');
-            const tooltip = document.getElementById('tooltip');
-
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const SIZE = 16;
-            const MAX_HEIGHT = 100;
-            const point = new obelisk.Point(160, 100);
-            const pixelView = new obelisk.PixelView(canvas, point);
-
-            // Precompute cube heights so hover can match the same scaling
-            const heights = new Array(totalSlots).fill(0);
-
-            // Render cubes
-            for (let w = 0; w < weeks; w++) {
-                for (let d = 0; d < 7; d++) {
-                    const idx = w * 7 + d;
-                    const item = padded[idx];
-                    if (!item || item.pad) continue;
-
-                    const count = item.count;
-                    let cubeHeight = 3;
-                    if (maxCount > 0) cubeHeight += Number.parseInt((MAX_HEIGHT / maxCount) * count, 10);
-                    heights[idx] = cubeHeight;
-
-                    const dimension = new obelisk.CubeDimension(SIZE, SIZE, cubeHeight);
-                    const colorInt = fillColorFor(count);
-                    const color = new obelisk.CubeColor().getByHorizontalColor(colorInt);
-                    const cube = new obelisk.Cube(dimension, color, false);
-                    const p3d = new obelisk.Point3D(SIZE * w, SIZE * d, 0);
-                    pixelView.renderObject(cube, p3d);
-                }
-            }
-
-            // ===== Hover hit-test (near-original feel) =====
-            // We can't use GitHub DOM tooltips here, so we implement our own.
-            // Strategy: estimate (week, day) by inverting the isometric projection.
-            // obelisk pixel projection (approx):
-            //   sx = originX + (x - y)
-            //   sy = originY + (x + y)/2 - z
-            // where x,y are in "SIZE" units.
-            // We'll solve for x,y from mouse position, then clamp to grid.
-
-            const isoToGrid = (mx, my) => {
-                // mx,my are relative to canvas top-left
-                const sx = mx - point.x;
-                const sy = my - point.y;
-
-                // Ignore z for picking; we want the column/row under cursor.
-                // From:
-                //   sx = x - y
-                //   sy ≈ (x + y)/2
-                // Solve:
-                //   x = sy + sx/2
-                //   y = sy - sx/2
-                const x = sy + sx / 2;
-                const y = sy - sx / 2;
-
-                const w = Math.floor(x / SIZE + 0.00001);
-                const d = Math.floor(y / SIZE + 0.00001);
-                return { w, d };
-            };
-
-            const showTooltip = (ev, item) => {
-                const rect = stage.getBoundingClientRect();
-                tooltip.style.display = 'block';
-                tooltip.style.opacity = '1';
-                tooltip.style.left = `${ev.clientX - rect.left}px`;
-                tooltip.style.top = `${ev.clientY - rect.top}px`;
-                const dateText = formatDateHuman(item.date);
-                tooltip.innerHTML = `<div><strong>${item.count}</strong> contributions</div><div class="k">on ${dateText}</div>`;
-            };
-
-            const hideTooltip = () => {
-                tooltip.style.opacity = '0';
-                tooltip.style.display = 'none';
-            };
-
-            // Remove previous handlers if re-rendered
-            canvas.onmousemove = null;
-            canvas.onmouseleave = null;
-
-            canvas.addEventListener('mousemove', (ev) => {
-                const cRect = canvas.getBoundingClientRect();
-                const mx = (ev.clientX - cRect.left) * (canvas.width / cRect.width);
-                const my = (ev.clientY - cRect.top) * (canvas.height / cRect.height);
-
-                const { w, d } = isoToGrid(mx, my);
-                if (w < 0 || d < 0 || w >= weeks || d >= 7) {
-                    hideTooltip();
-                    return;
-                }
-
-                const idx = w * 7 + d;
-                const item = padded[idx];
-                if (!item || item.pad || !item.date) {
-                    hideTooltip();
-                    return;
-                }
-
-                // Additional check: cursor should be above the base diamond region.
-                // If user points far above, projection may map incorrectly. We do a soft guard by checking local cell center distance.
-                const centerX = point.x + (w * SIZE - d * SIZE) + SIZE / 2;
-                const centerY = point.y + (w * SIZE + d * SIZE) / 2;
-                const dist = Math.hypot(mx - centerX, my - centerY);
-                if (dist > SIZE * 1.2) {
-                    hideTooltip();
-                    return;
-                }
-
-                showTooltip(ev, item);
-            }, { passive: true });
-
-            canvas.addEventListener('mouseleave', hideTooltip, { passive: true });
-        }
-
-        // ===== Render 2D heatmap (keep) =====
-        function renderHeatmap(days) {
-            const cells = document.getElementById('cells');
-            cells.innerHTML = '';
-
+        function render(days) {
+            const stats = calcStats(days);
             const first = new Date(days[0].date + 'T00:00:00');
             const pad = first.getDay();
             const padded = Array.from({ length: pad }, () => ({ date: null, count: 0, pad: true })).concat(days);
-            const totalSlots = Math.ceil(padded.length / 7) * 7;
-            while (padded.length < totalSlots) padded.push({ date: null, count: 0, pad: true });
-            const weeks = totalSlots / 7;
+            const weeks = Math.ceil(padded.length / 7);
 
+            // Update UI
+            document.getElementById('header-title').textContent = `${fmt(stats.total)} contributions in the last year`;
+            document.getElementById('stat-total').textContent = fmt(stats.total);
+            document.getElementById('stat-range').textContent = `${fmtDate(stats.range[0])} — ${fmtDate(stats.range[1])}`;
+            document.getElementById('stat-busy').textContent = stats.busiest.count;
+            document.getElementById('stat-busy-date').textContent = fmtDate(stats.busiest.date);
+            document.getElementById('stat-long').textContent = stats.longest.len;
+            document.getElementById('stat-long-range').textContent = stats.longest.start ? `${fmtDate(stats.longest.start)} — ${fmtDate(stats.longest.end)}` : '-';
+            document.getElementById('stat-cur').textContent = stats.current.len;
+            document.getElementById('stat-cur-range').textContent = 'Last streak';
+
+            // 2D Heatmap
+            const cells = document.getElementById('cells');
             const monthsEl = document.getElementById('months');
-            monthsEl.innerHTML = '';
-
-            const monthAtWeek = new Map();
-            for (let w = 0; w < weeks; w++) {
-                for (let d = 0; d < 7; d++) {
-                    const item = padded[w * 7 + d];
-                    if (item && !item.pad && item.date) {
-                        const dt = new Date(item.date + 'T00:00:00');
-                        const m = dt.getMonth();
-                        const key = `${dt.getFullYear()}-${m}`;
-                        if (!monthAtWeek.has(key)) monthAtWeek.set(key, w);
-                        break;
-                    }
-                }
-            }
+            cells.innerHTML = ''; monthsEl.innerHTML = '';
 
             monthsEl.style.gridTemplateColumns = `repeat(${weeks}, 12px)`;
-            for (const [key, w] of monthAtWeek.entries()) {
-                const [, m] = key.split('-').map(Number);
-                const span = document.createElement('span');
-                span.textContent = MONTHS[m];
-                span.style.gridColumn = String(w + 1);
-                monthsEl.appendChild(span);
-            }
-
+            let lastMonth = -1;
             for (let w = 0; w < weeks; w++) {
-                for (let d = 0; d < 7; d++) {
-                    const item = padded[w * 7 + d];
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    if (item && !item.pad && item.date) {
-                        cell.style.background = colorForCount(item.count);
-                        cell.title = `${item.count} contributions on ${formatDateHuman(item.date)}`;
-                    } else {
-                        cell.style.background = 'transparent';
-                        cell.style.boxShadow = 'none';
+                const item = padded[w * 7];
+                if (item && !item.pad) {
+                    const m = new Date(item.date + 'T00:00:00').getMonth();
+                    if (m !== lastMonth) {
+                        const span = document.createElement('span'); span.textContent = MONTHS[m];
+                        span.style.gridColumn = w + 1; monthsEl.appendChild(span); lastMonth = m;
                     }
-                    cells.appendChild(cell);
+                }
+                for (let d = 0; d < 7; d++) {
+                    const day = padded[w * 7 + d];
+                    const div = document.createElement('div'); div.className = 'cell';
+                    if (day && !day.pad) {
+                        div.style.background = colorForCount(day.count);
+                        div.title = `${day.count} on ${day.date}`;
+                    } else { div.style.background = 'transparent'; div.style.boxShadow = 'none'; }
+                    cells.appendChild(div);
+                }
+            }
+
+            // 3D Isometric (Obelisk)
+            if (window.obelisk) {
+                const canvas = document.getElementById('iso-canvas');
+                const pixelView = new obelisk.PixelView(canvas, new obelisk.Point(180, 100));
+                const SIZE = 16;
+                let maxCount = Math.max(...days.map(d => d.count));
+
+                for (let w = 0; w < weeks; w++) {
+                    for (let d = 0; d < 7; d++) {
+                        const day = padded[w * 7 + d];
+                        if (!day || day.pad) continue;
+                        let h = 3 + (maxCount > 0 ? (day.count / maxCount) * 80 : 0);
+                        const color = new obelisk.CubeColor().getByHorizontalColor(parseInt(colorForCount(day.count).replace('#', ''), 16));
+                        pixelView.renderObject(new obelisk.Cube(new obelisk.CubeDimension(SIZE, SIZE, h), color, false), new obelisk.Point3D(w * SIZE, d * SIZE, 0));
+                    }
                 }
             }
         }
 
-        // ===== View controls =====
-        function setView(mode) {
-            const isoShell = document.getElementById('iso-shell');
-            const btn3d = document.getElementById('btn-3d');
-            const btn2d = document.getElementById('btn-2d');
-            if (mode === '3d') {
-                isoShell.style.display = '';
-                btn3d.setAttribute('aria-pressed', 'true');
-                btn2d.setAttribute('aria-pressed', 'false');
-            } else {
-                isoShell.style.display = 'none';
-                btn3d.setAttribute('aria-pressed', 'false');
-                btn2d.setAttribute('aria-pressed', 'true');
-            }
-        }
-
-        // ===== GitHub GraphQL (token-ready) =====
-        // URL: https://api.github.com/graphql
-        // Docs: https://docs.github.com/en/graphql
-        async function fetchRealContributions(username, token) {
-            const query = `
-        query($login: String!) {
-          user(login: $login) {
-            contributionsCollection {
-              contributionCalendar {
-                weeks {
-                  contributionDays {
-                    contributionCount
-                    date
-                  }
-                }
-              }
-            }
-          }
-        }
-      `;
-
-            const res = await fetch('https://api.github.com/graphql', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query, variables: { login: username } })
-            });
-            if (!res.ok) throw new Error(`GitHub GraphQL error: ${res.status}`);
-            const json = await res.json();
-            const weeks = json?.data?.user?.contributionsCollection?.contributionCalendar?.weeks || [];
-            const days = weeks.flatMap(w => (w.contributionDays || []).map(d => ({ date: d.date, count: d.contributionCount })));
-            return days.slice(-365);
-        }
-
-        // ===== Fetch from metrics.json (Action output) =====
-        async function fetchFromMetricsJson() {
-            try {
-                const res = await fetch('https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/metrics.json');
-                if (!res.ok) throw new Error('metrics.json not found');
-                const data = await res.json();
-
-                // Extract calendar data. metrics output structure: data.contributions.calendar
-                const calendar = data?.contributions?.calendar || [];
-                if (calendar.length === 0) throw new Error('Empty calendar data');
-
-                return calendar.map(d => ({ date: d.date, count: d.count }));
-            } catch (e) {
-                console.warn('Falling back to mock data:', e.message);
-                return generateContributionData();
-            }
-        }
-
-        // ===== Init =====
-        async function init() {
-            const days = await fetchFromMetricsJson();
-            renderIsometricObelisk(days);
-            renderHeatmap(days);
-            applyStats(calcStats(days));
-
-            document.getElementById('btn-3d').addEventListener('click', () => setView('3d'));
-            document.getElementById('btn-2d').addEventListener('click', () => setView('2d'));
-
-            document.getElementById('hide-normal').addEventListener('change', (e) => {
-                document.getElementById('heatmap-wrap').style.display = e.target.checked ? 'none' : '';
-            });
-
-            document.getElementById('btn-settings').addEventListener('click', () => {
-                const btn = document.getElementById('btn-settings');
-                const expanded = btn.getAttribute('aria-expanded') === 'true';
-                btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-                alert('Real data fetched via GitHub Actions metrics.json.');
-            });
-        }
-
-        init();
+        window.onload = () => {
+            render(REAL_DATA);
+            document.getElementById('btn-3d').onclick = () => { document.getElementById('iso-shell').style.display = ''; };
+            document.getElementById('btn-2d').onclick = () => { document.getElementById('iso-shell').style.display = 'none'; };
+            document.getElementById('hide-normal').onchange = (e) => { document.getElementById('heatmap-wrap').style.display = e.target.checked ? 'none' : ''; };
+        };
     </script>
 </body>
 
