@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      # Step 1: Generate isocalendar only (for 3D calendar)
+      # Step 1: Generate isocalendar.svg
       - uses: lowlighter/metrics@latest
         with:
           token: ${{ secrets.METRICS_TOKEN }}
@@ -22,3 +22,15 @@ jobs:
           filename: isocalendar.svg
           plugin_isocalendar: yes
           plugin_isocalendar_duration: half-year
+
+      # Step 2: Generate metrics.json (for raw data)
+      - uses: lowlighter/metrics@latest
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: jvisualschool
+          template: classic
+          base: ""
+          config_timezone: Asia/Seoul
+          filename: metrics.json
+          config_output: json
+
