@@ -28,7 +28,7 @@ jobs:
           template: classic
           base: header, activity, community, repositories, metadata
           config_timezone: Asia/Seoul
-          filename: github-metrics-final.svg
+          filename: github-metrics.svg
           
           # Plugins
           plugin_achievements: no
