@@ -1,49 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JVisualSchool - GitHub Insights</title>
+    <title>JVisualSchool | Developer Portfolio</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
-        <header>
-            <h1>JVisualSchool</h1>
-            <p class="subtitle">Exploring Code through Visualization</p>
-            <a href="https://github.com/jvisualschool" class="btn"><i class="fab fa-github"></i> Visit Profile</a>
-        </header>
 
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>JVisualSchool</h1>
+            <p>Visualizing Code, Building Experiences.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="#projects" class="btn">View Projects</a>
+                <a href="https://github.com/jvisualschool" class="btn"
+                    style="background: transparent; border: 1px solid var(--accent-color);">GitHub Profile</a>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <h2 class="section-title" id="projects">Selected Projects</h2>
+        <div class="projects-grid">
+
+            <!-- Project 1 -->
+            <article class="project-card">
+                <div class="project-title">SpaceX Explorer</div>
+                <p class="project-desc">Interactive web application to explore SpaceX launches and missions data.</p>
+                <div class="project-meta">
+                    <div class="lang-tag"><span class="lang-dot" style="background: #f1e05a;"></span>JavaScript</div>
+                    <a href="https://github.com/jvisualschool/SpaceX-Explorer" class="project-link">View Code <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Project 2 -->
+            <article class="project-card">
+                <div class="project-title">Spot Difference</div>
+                <p class="project-desc">A fun web-based game to spot differences between images.</p>
+                <div class="project-meta">
+                    <div class="lang-tag"><span class="lang-dot" style="background: #e34c26;"></span>HTML</div>
+                    <a href="https://github.com/jvisualschool/Spot-difference" class="project-link">View Code <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Project 3 -->
+            <article class="project-card">
+                <div class="project-title">Metrics Viewer</div>
+                <p class="project-desc">GitHub Stats & Portfolio Viewer utilizing GitHub Actions and Lowlighter Metrics.
+                </p>
+                <div class="project-meta">
+                    <div class="lang-tag"><span class="lang-dot" style="background: #563d7c;"></span>CSS</div>
+                    <a href="https://github.com/jvisualschool/jvisualschool-metrics" class="project-link">View Code <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Project 4 -->
+            <article class="project-card">
+                <div class="project-title">Roulette</div>
+                <p class="project-desc">A simple decision-making roulette application.</p>
+                <div class="project-meta">
+                    <div class="lang-tag"><span class="lang-dot" style="background: #2b7489;"></span>TypeScript</div>
+                    <a href="https://github.com/jvisualschool/roulette" class="project-link">View Code <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Metrics Section -->
+        <h2 class="section-title">GitHub Overview</h2>
         <section class="card">
             <div class="metrics-container">
-                <!-- The image source points to the generated metrics file. 
-                     On a local machine, this won't load until the file exists.
-                     On GitHub Pages, this will point to the file in the repo. -->
-                <img src="github-metrics.svg" alt="GitHub Metrics" onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
-                
+                <img src="github-metrics.svg" alt="GitHub Metrics"
+                    onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
+
                 <div id="placeholder" class="loading-placeholder" style="display: none;">
                     <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 1rem;"></i>
-                    <h3>Metrics Not Found Yet</h3>
-                    <p>Once the GitHub Action runs, your stats will appear here.</p>
+                    <h3>Generating Stats...</h3>
+                    <p>Metrics are being calculated via GitHub Actions.</p>
                 </div>
             </div>
         </section>
 
-        <section class="card" style="text-align: center;">
-            <h2>About</h2>
-            <p style="margin-top: 1rem; line-height: 1.6;">
-                안녕하세요! <strong>JVisualSchool</strong>의 GitHub 활동 시각화 페이지입니다.<br>
-                Lowlighter Metrics를 활용하여 자동으로 생성된 데이터를 보여줍니다.
-            </p>
-        </section>
     </div>
 
     <footer>
-        <p>Powered by <a href="https://github.com/lowlighter/metrics">Metrics</a> & GitHub Actions</p>
+        <p>&copy; 2026 JVisualSchool. Built with GitHub Pages & Metrics.</p>
+        <div style="margin-top: 1rem;">
+            <a href="https://github.com/jvisualschool"><i class="fab fa-github fa-lg"></i></a>
+        </div>
     </footer>
 
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>
