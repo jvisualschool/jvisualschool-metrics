@@ -25,67 +25,55 @@
 
         <!-- Projects Section -->
         <h2 class="section-title" id="projects">Selected Projects</h2>
-        <div class="projects-grid">
-
-            <!-- Project 1 -->
-            <article class="project-card">
-                <div class="project-title">SpaceX Explorer</div>
-                <p class="project-desc">Interactive web application to explore SpaceX launches and missions data.</p>
-                <div class="project-meta">
-                    <div class="lang-tag"><span class="lang-dot" style="background: #f1e05a;"></span>JavaScript</div>
-                    <a href="https://github.com/jvisualschool/SpaceX-Explorer" class="project-link">View Code <i
-                            class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-
-            <!-- Project 2 -->
-            <article class="project-card">
-                <div class="project-title">Spot Difference</div>
-                <p class="project-desc">A fun web-based game to spot differences between images.</p>
-                <div class="project-meta">
-                    <div class="lang-tag"><span class="lang-dot" style="background: #e34c26;"></span>HTML</div>
-                    <a href="https://github.com/jvisualschool/Spot-difference" class="project-link">View Code <i
-                            class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-
-            <!-- Project 3 -->
-            <article class="project-card">
-                <div class="project-title">Metrics Viewer</div>
-                <p class="project-desc">GitHub Stats & Portfolio Viewer utilizing GitHub Actions and Lowlighter Metrics.
-                </p>
-                <div class="project-meta">
-                    <div class="lang-tag"><span class="lang-dot" style="background: #563d7c;"></span>CSS</div>
-                    <a href="https://github.com/jvisualschool/jvisualschool-metrics" class="project-link">View Code <i
-                            class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-
-            <!-- Project 4 -->
-            <article class="project-card">
-                <div class="project-title">Roulette</div>
-                <p class="project-desc">A simple decision-making roulette application.</p>
-                <div class="project-meta">
-                    <div class="lang-tag"><span class="lang-dot" style="background: #2b7489;"></span>TypeScript</div>
-                    <a href="https://github.com/jvisualschool/roulette" class="project-link">View Code <i
-                            class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-
+        <div class="projects-grid" id="projectsGrid">
+            <!-- Projects will be loaded dynamically -->
         </div>
 
-        <!-- Metrics Section -->
+        <!-- GitHub Stats Section -->
         <h2 class="section-title">GitHub Overview</h2>
-        <section class="card">
-            <div class="metrics-container">
-                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/metrics.svg?v=final"
-                    alt="GitHub Metrics"
-                    onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
 
-                <div id="placeholder" class="loading-placeholder" style="display: none;">
-                    <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 1rem;"></i>
-                    <h3>Generating Stats...</h3>
-                    <p>Metrics are being calculated via GitHub Actions.</p>
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
+                <div class="stat-value" id="totalRepos">-</div>
+                <div class="stat-label">Repositories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-value" id="totalStars">-</div>
+                <div class="stat-label">Stars</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-code-fork"></i></div>
+                <div class="stat-value" id="totalForks">-</div>
+                <div class="stat-label">Forks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="followers">-</div>
+                <div class="stat-label">Followers</div>
+            </div>
+        </div>
+
+        <!-- Language Stats -->
+        <section class="card">
+            <h3 style="margin-bottom: 1.5rem;">Most Used Languages</h3>
+            <div id="languageStats" class="language-stats">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Loading language statistics...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="card">
+            <h3 style="margin-bottom: 1.5rem;">Recent Activity</h3>
+            <div id="recentActivity" class="activity-list">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Loading recent activity...</p>
                 </div>
             </div>
         </section>
@@ -93,7 +81,7 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 JVisualSchool. Built with GitHub Pages & Metrics.</p>
+        <p>&copy; 2026 JVisualSchool. Built with GitHub API & Love.</p>
         <div style="margin-top: 1rem;">
             <a href="https://github.com/jvisualschool"><i class="fab fa-github fa-lg"></i></a>
         </div>
