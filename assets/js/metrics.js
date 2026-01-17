@@ -156,7 +156,7 @@ function generateContributionCalendar(events) {
         }
     });
 
-    // Generate calendar grid
+    // Generate calendar data
     const days = [];
     const currentDate = new Date(sixMonthsAgo);
 
@@ -173,14 +173,80 @@ function generateContributionCalendar(events) {
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    const grid = days.map(day =>
-        `<div class="calendar-day level-${day.level}" title="${day.date}: ${day.count} commits"></div>`
-    ).join('');
+    // Create isometric 3D visualization SVG
+    const width = 520;
+    const height = 180;
+    const blockSize = 8;
+
+    // Isometric projection
+    const isoX = (x, y) => (x - y) * Math.cos(Math.PI / 6) * blockSize;
+    const isoY = (x, y, z) => (x + y) * Math.sin(Math.PI / 6) * blockSize - z * blockSize * 0.8;
+
+    // Adjust brightness helper
+    const adjustBrightness = (color, percent) => {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+        const G = Math.max(0, Math.min(255, (num >> 8 & 0x00FF) + amt));
+        const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+        return '#' + ((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1);
+    };
+
+    let svgContent = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="background: #0d1117; border-radius: 6px;">`;
+
+    // Group days by week
+    const weeks = [];
+    for (let i = 0; i < days.length; i += 7) {
+        weeks.push(days.slice(i, i + 7));
+    }
+
+    // Draw blocks from back to front for proper layering
+    for (let weekIdx = weeks.length - 1; weekIdx >= 0; weekIdx--) {
+        const week = weeks[weekIdx];
+        for (let dayIdx = 0; dayIdx < week.length; dayIdx++) {
+            const day = week[dayIdx];
+            if (day.level === 0) continue;
+
+            const x = weekIdx;
+            const y = dayIdx;
+            const z = day.level;
+
+            const baseX = isoX(x, y) + width / 2;
+            const baseY = isoY(x, y, 0) + height - 30;
+
+            // Draw stack of blocks
+            for (let h = 0; h < z; h++) {
+                const blockY = baseY - h * blockSize * 0.8;
+
+                const colors = ['#0e4429', '#006d32', '#26a641', '#39d353'];
+                const color = colors[Math.min(h, 3)];
+                const topColor = adjustBrightness(color, 30);
+                const sideColor = adjustBrightness(color, -15);
+
+                const bx = baseX;
+                const by = blockY;
+                const bs = blockSize;
+                const cos30 = Math.cos(Math.PI / 6) * bs;
+                const sin30 = Math.sin(Math.PI / 6) * bs;
+
+                // Top face
+                svgContent += `<polygon points="${bx},${by - bs} ${bx + cos30},${by - sin30 - bs} ${bx},${by - bs * 2} ${bx - cos30},${by - sin30 - bs}" fill="${topColor}" stroke="#000" stroke-width="0.3" opacity="0.9"/>`;
+
+                // Left face
+                svgContent += `<polygon points="${bx},${by - bs} ${bx - cos30},${by - sin30 - bs} ${bx - cos30},${by + sin30 - bs} ${bx},${by}" fill="${color}" stroke="#000" stroke-width="0.3" opacity="0.9"/>`;
+
+                // Right face
+                svgContent += `<polygon points="${bx},${by - bs} ${bx + cos30},${by - sin30 - bs} ${bx + cos30},${by + sin30 - bs} ${bx},${by}" fill="${sideColor}" stroke="#000" stroke-width="0.3" opacity="0.9"/>`;
+            }
+        }
+    }
+
+    svgContent += '</svg>';
 
     return `
         <div class="calendar-section">
             <div class="stats-section-title">📅 Contributions calendar</div>
-            <div class="calendar-grid">${grid}</div>
+            <div class="calendar-3d">${svgContent}</div>
         </div>
     `;
 }

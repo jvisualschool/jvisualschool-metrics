@@ -124,37 +124,16 @@ body {
     margin-bottom: 16px;
 }
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
+.calendar-3d {
     margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
 }
 
-.calendar-day {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    background: var(--muted-bg);
-}
-
-.calendar-day.level-0 {
-    background: #ebedf0;
-}
-
-.calendar-day.level-1 {
-    background: #9be9a8;
-}
-
-.calendar-day.level-2 {
-    background: #40c463;
-}
-
-.calendar-day.level-3 {
-    background: #30a14e;
-}
-
-.calendar-day.level-4 {
-    background: #216e39;
+.calendar-3d svg {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Languages */
