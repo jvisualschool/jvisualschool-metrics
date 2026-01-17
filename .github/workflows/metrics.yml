@@ -11,35 +11,14 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Step 1: Generate isocalendar only (for 3D calendar)
       - uses: lowlighter/metrics@latest
         with:
-          # Your GitHub token
-          # The following scopes are required:
-          #  - public_access (default scope)
-          # The following additional scopes may be required:
-          #  - read:org      (for organization related metrics)
-          #  - read:user     (for user related data)
-          #  - read:packages (for some packages related data)
-          #  - repo          (optional, if you want to include private repositories)
           token: ${{ secrets.METRICS_TOKEN }}
-
-          # Options
           user: jvisualschool
           template: classic
-          base: header, activity, community, repositories, metadata
+          base: ""
           config_timezone: Asia/Seoul
-          filename: metrics.svg
-          
-          # Plugins
-          # Achievements disabled explicitly by removal
+          filename: isocalendar.svg
           plugin_isocalendar: yes
           plugin_isocalendar_duration: half-year
-          
-          plugin_languages: yes
-          plugin_languages_ignored: >-
-            html, css
-          plugin_languages_details: bytes-size, percentage
-          
-
-          plugin_stars: yes
-          plugin_stars_limit: 4

@@ -142,15 +142,15 @@ function renderStats(user, repos) {
 }
 
 function generateContributionCalendar(events) {
-    // Use the original GitHub-generated isometric calendar from the metrics SVG
+    // Use the isocalendar-only SVG from GitHub Actions
     return `
         <div class="calendar-section">
             <div class="stats-section-title">📅 Contributions calendar</div>
             <div class="calendar-3d">
-                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/github-metrics.svg" 
+                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/isocalendar.svg" 
                      alt="Contribution Calendar" 
                      style="width: 100%; max-width: 480px; border-radius: 6px;"
-                     onerror="this.parentElement.innerHTML='<p style=\\'color:#666;text-align:center;\\'>Calendar not available</p>';">
+                     onerror="this.parentElement.innerHTML='<p style=\\'color:#666;text-align:center;\\'>Calendar loading...</p>';">
             </div>
         </div>
     `;
