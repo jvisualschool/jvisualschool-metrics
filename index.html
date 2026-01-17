@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVisualSchool - GitHub Insights</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JVisualSchool</h1>
+            <p class="subtitle">Exploring Code through Visualization</p>
+            <a href="https://github.com/jvisualschool" class="btn"><i class="fab fa-github"></i> Visit Profile</a>
+        </header>
+
+        <section class="card">
+            <div class="metrics-container">
+                <!-- The image source points to the generated metrics file. 
+                     On a local machine, this won't load until the file exists.
+                     On GitHub Pages, this will point to the file in the repo. -->
+                <img src="github-metrics.svg" alt="GitHub Metrics" onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
+                
+                <div id="placeholder" class="loading-placeholder" style="display: none;">
+                    <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 1rem;"></i>
+                    <h3>Metrics Not Found Yet</h3>
+                    <p>Once the GitHub Action runs, your stats will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card" style="text-align: center;">
+            <h2>About</h2>
+            <p style="margin-top: 1rem; line-height: 1.6;">
+                안녕하세요! <strong>JVisualSchool</strong>의 GitHub 활동 시각화 페이지입니다.<br>
+                Lowlighter Metrics를 활용하여 자동으로 생성된 데이터를 보여줍니다.
+            </p>
+        </section>
+    </div>
+
+    <footer>
+        <p>Powered by <a href="https://github.com/lowlighter/metrics">Metrics</a> & GitHub Actions</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
