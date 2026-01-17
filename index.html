@@ -4,51 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JVisualSchool | Developer Portfolio</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>jvisualschool - GitHub Metrics</title>
+    <link rel="stylesheet" href="assets/css/metrics.css">
 </head>
 
 <body>
-    <div class="container">
-
-        <!-- Hero Section -->
-        <section class="hero">
-            <h1>JVisualSchool</h1>
-            <p>Visualizing Code, Building Experiences.</p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="#metrics" class="btn">View Stats</a>
-                <a href="https://github.com/jvisualschool" class="btn"
-                    style="background: transparent; border: 1px solid var(--accent-color);">GitHub Profile</a>
-            </div>
-        </section>
-
-        <!-- Metrics Section -->
-        <h2 class="section-title" id="metrics">GitHub Metrics</h2>
-        <section class="card">
-            <div class="metrics-container">
-                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/github-metrics.svg"
-                    alt="GitHub Metrics"
-                    onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
-
-                <div id="placeholder" class="loading-placeholder" style="display: none;">
-                    <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 1rem;"></i>
-                    <h3>Metrics Not Available</h3>
-                    <p>The metrics image could not be loaded.</p>
-                </div>
-            </div>
-        </section>
-
+    <div id="metrics" class="metrics-container">
+        <div class="loading">
+            <div class="spinner"></div>
+            Loading metrics...
+        </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 JVisualSchool. Built with GitHub Pages & Metrics.</p>
-        <div style="margin-top: 1rem;">
-            <a href="https://github.com/jvisualschool"><i class="fab fa-github fa-lg"></i></a>
-        </div>
-    </footer>
-
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/metrics.js"></script>
 </body>
 
 </html>
