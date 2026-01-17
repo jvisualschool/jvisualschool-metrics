@@ -141,6 +141,113 @@ function renderStats(user, repos) {
     `;
 }
 
+function generateContributionCalendar(events) {
+    // Get last 6 months of dates
+    const today = new Date();
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+    // Count commits per day
+    const commitsByDate = {};
+    events.forEach(event => {
+        if (event.type === 'PushEvent') {
+            const date = new Date(event.created_at).toISOString().split('T')[0];
+            commitsByDate[date] = (commitsByDate[date] || 0) + (event.payload.commits?.length || 1);
+        }
+    });
+
+    // Generate calendar grid
+    const days = [];
+    const currentDate = new Date(sixMonthsAgo);
+
+    while (currentDate <= today) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const count = commitsByDate[dateStr] || 0;
+        let level = 0;
+        if (count > 0) level = 1;
+        if (count > 2) level = 2;
+        if (count > 5) level = 3;
+        if (count > 10) level = 4;
+
+        days.push({ date: dateStr, count, level });
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    const grid = days.map(day =>
+        `<div class="calendar-day level-${day.level}" title="${day.date}: ${day.count} commits"></div>`
+    ).join('');
+
+    return `
+        <div class="calendar-section">
+            <div class="stats-section-title">📅 Contributions calendar</div>
+            <div class="calendar-grid">${grid}</div>
+        </div>
+    `;
+}
+
+function calculateCommitStats(events) {
+    const pushEvents = events.filter(e => e.type === 'PushEvent');
+    const commitsByDate = {};
+
+    pushEvents.forEach(event => {
+        const date = new Date(event.created_at).toISOString().split('T')[0];
+        commitsByDate[date] = (commitsByDate[date] || 0) + (event.payload.commits?.length || 1);
+    });
+
+    const dates = Object.keys(commitsByDate).sort();
+    const counts = Object.values(commitsByDate);
+
+    // Calculate streak
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let tempStreak = 0;
+
+    const today = new Date().toISOString().split('T')[0];
+    for (let i = 0; i < 30; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        if (commitsByDate[dateStr]) {
+            tempStreak++;
+            if (i === 0) currentStreak = tempStreak;
+        } else {
+            if (tempStreak > bestStreak) bestStreak = tempStreak;
+            tempStreak = 0;
+        }
+    }
+
+    const maxInDay = Math.max(...counts, 0);
+    const avgPerDay = counts.length > 0 ? (counts.reduce((a, b) => a + b, 0) / counts.length).toFixed(2) : 0;
+
+    return `
+        <div class="stats-grid">
+            <div class="stats-section">
+                <div class="stats-section-title">🔥 Commits streaks</div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 01-1.484.211c-.04-.282-.163-.547-.37-.847a8.695 8.695 0 00-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.75.75 0 01-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75zM6 15.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75zM5.75 12a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z"/></svg>
+                    Current streak <span class="stat-value">${currentStreak}</span> day${currentStreak !== 1 ? 's' : ''}
+                </div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 01-1.484.211c-.04-.282-.163-.547-.37-.847a8.695 8.695 0 00-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.75.75 0 01-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75zM6 15.25a.75.75 0 01.75-.75h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 01-.75-.75zM5.75 12a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z"/></svg>
+                    Best streak <span class="stat-value">${bestStreak}</span> day${bestStreak !== 1 ? 's' : ''}
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <div class="stats-section-title">📈 Commits per day</div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.5 7.742V4.75z"/></svg>
+                    Highest in a day at <span class="stat-value">${maxInDay}</span>
+                </div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.5 7.742V4.75z"/></svg>
+                    Average per day at <span class="stat-value">${avgPerDay}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderRecentRepos(repos) {
     const starred = repos
         .filter(r => r.stargazers_count > 0)
@@ -182,15 +289,18 @@ async function init() {
     container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading metrics...</div>';
 
     try {
-        const [user, repos] = await Promise.all([
+        const [user, repos, events] = await Promise.all([
             fetchUserData(),
-            fetchRepos()
+            fetchRepos(),
+            fetchEvents()
         ]);
 
         const html = `
             ${renderProfile(user)}
             ${renderStats(user, repos)}
             ${renderLanguages(repos)}
+            ${generateContributionCalendar(events)}
+            ${calculateCommitStats(events)}
             ${renderRecentRepos(repos)}
             <div class="metrics-footer">
                 Last updated ${new Date().toLocaleString('en-US', {
@@ -199,8 +309,9 @@ async function init() {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
+            second: '2-digit',
             timeZone: 'Asia/Seoul'
-        })} (timezone Asia/Seoul)
+        })} (timezone Asia/Seoul) with lowlighter/metrics@3.34.0
             </div>
         `;
 
