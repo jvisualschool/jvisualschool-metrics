@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Isometric Contributions (via Obelisk.js)</title>
+    <!-- Include Obelisk.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/obelisk.js/1.2.2/obelisk.min.js"></script>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            max-width: 1100px;
+            width: 95%;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            background: #0d1117;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+        }
+
+        .stats {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            border-top: 1px solid #30363d;
+            padding-top: 20px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #39d353;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>GitHub Isometric Contributions</h2>
+            <div id="username-display">@jvisualschool</div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="contribution-canvas"></canvas>
+        </div>
+
+        <div class="stats" id="stats-container">
+            <!-- Stats will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        const USERNAME = 'jvisualschool';
+
+        // Obelisk configuration
+        const SIZE = 10;
+        const GAP = 2;
+
+        // Modern GitHub Contribution Colors
+        const COLORS = [
+            0x161b22, // Level 0
+            0x0e4429, // Level 1
+            0x006d32, // Level 2
+            0x26a641, // Level 3
+            0x39d353  // Level 4
+        ];
+
+        async function init() {
+            const data = await getContributionData();
+            render(data);
+            populateStats(data);
+        }
+
+        async function getContributionData() {
+            // In a real scenario, we'd fetch from a proxy or use the API
+            // For this demo, we'll generate 1 year of realistic data
+            const entries = [];
+            const today = new Date();
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+            // Align to the start of the week
+            const startDate = new Date(oneYearAgo);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+
+            let current = new Date(startDate);
+            while (current <= today) {
+                const dateStr = current.toISOString().split('T')[0];
+                const dayOfWeek = current.getDay();
+
+                // Randomly generate counts based on day of week and some peaks
+                let count = 0;
+                if (Math.random() > 0.4) {
+                    count = Math.floor(Math.random() * 12);
+                    if (dayOfWeek === 0 || dayOfWeek === 6) count = Math.floor(count / 2);
+                }
+
+                entries.push({ date: dateStr, count, level: getLevel(count) });
+                current.setDate(current.getDate() + 1);
+            }
+            return entries;
+        }
+
+        function getLevel(count) {
+            if (count === 0) return 0;
+            if (count <= 3) return 1;
+            if (count <= 6) return 2;
+            if (count <= 10) return 3;
+            return 4;
+        }
+
+        function render(data) {
+            const canvas = document.getElementById('contribution-canvas');
+
+            // Calculate dimensions
+            const numWeeks = Math.ceil(data.length / 7);
+            const canvasWidth = numWeeks * (SIZE + GAP) * 2;
+            const canvasHeight = 400;
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            // Initialize Obelisk
+            const point = new obelisk.Point(canvasWidth / 2 - 100, canvasHeight / 2 - 50);
+            const pixelView = new obelisk.PixelView(canvas, point);
+
+            // Group into weeks
+            const weeks = [];
+            for (let i = 0; i < data.length; i += 7) {
+                weeks.push(data.slice(i, i + 7));
+            }
+
+            // Draw from back to front
+            weeks.forEach((week, weekIdx) => {
+                week.forEach((day, dayIdx) => {
+                    if (!day) return;
+
+                    const x = weekIdx * (SIZE + GAP);
+                    const y = dayIdx * (SIZE + GAP);
+                    const z = 0;
+                    const h = Math.max(2, day.level * 6); // Height based on level
+
+                    const color = new obelisk.CubeColor().getByHorizontalColor(COLORS[day.level]);
+                    const dimension = new obelisk.CubeDimension(SIZE, SIZE, h);
+                    const cube = new obelisk.Cube(dimension, color, false);
+
+                    pixelView.renderObject(cube, new obelisk.Point3D(x, y, z));
+                });
+            });
+        }
+
+        function populateStats(data) {
+            const total = data.reduce((sum, d) => sum + d.count, 0);
+            const max = Math.max(...data.map(d => d.count));
+
+            let currentStreak = 0;
+            let longestStreak = 0;
+            let tempStreak = 0;
+
+            data.forEach(d => {
+                if (d.count > 0) {
+                    tempStreak++;
+                    if (tempStreak > longestStreak) longestStreak = tempStreak;
+                } else {
+                    tempStreak = 0;
+                }
+            });
+
+            // Last days for current streak
+            for (let i = data.length - 1; i >= 0; i--) {
+                if (data[i].count > 0) currentStreak++;
+                else if (i < data.length - 2) break; // Allow 1 day gap maybe? No, be strict
+            }
+
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = `
+                <div class="stat-box">
+                    <span class="stat-label">Total Contributions</span>
+                    <span class="stat-value">${total.toLocaleString()}</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Longest Streak</span>
+                    <span class="stat-value">${longestStreak} days</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Current Streak</span>
+                    <span class="stat-value">${currentStreak} days</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Max in a day</span>
+                    <span class="stat-value">${max}</span>
+                </div>
+            `;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
