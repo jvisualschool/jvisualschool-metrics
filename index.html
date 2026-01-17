@@ -17,63 +17,24 @@
             <h1>JVisualSchool</h1>
             <p>Visualizing Code, Building Experiences.</p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="#projects" class="btn">View Projects</a>
+                <a href="#metrics" class="btn">View Stats</a>
                 <a href="https://github.com/jvisualschool" class="btn"
                     style="background: transparent; border: 1px solid var(--accent-color);">GitHub Profile</a>
             </div>
         </section>
 
-        <!-- Projects Section -->
-        <h2 class="section-title" id="projects">Selected Projects</h2>
-        <div class="projects-grid" id="projectsGrid">
-            <!-- Projects will be loaded dynamically -->
-        </div>
-
-        <!-- GitHub Stats Section -->
-        <h2 class="section-title">GitHub Overview</h2>
-
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
-                <div class="stat-value" id="totalRepos">-</div>
-                <div class="stat-label">Repositories</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-star"></i></div>
-                <div class="stat-value" id="totalStars">-</div>
-                <div class="stat-label">Stars</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-code-fork"></i></div>
-                <div class="stat-value" id="totalForks">-</div>
-                <div class="stat-label">Forks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <div class="stat-value" id="followers">-</div>
-                <div class="stat-label">Followers</div>
-            </div>
-        </div>
-
-        <!-- Language Stats -->
+        <!-- Metrics Section -->
+        <h2 class="section-title" id="metrics">GitHub Metrics</h2>
         <section class="card">
-            <h3 style="margin-bottom: 1.5rem;">Most Used Languages</h3>
-            <div id="languageStats" class="language-stats">
-                <div class="loading-placeholder">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p>Loading language statistics...</p>
-                </div>
-            </div>
-        </section>
+            <div class="metrics-container">
+                <img src="https://raw.githubusercontent.com/jvisualschool/jvisualschool-metrics/master/github-metrics.svg"
+                    alt="GitHub Metrics"
+                    onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
 
-        <!-- Recent Activity -->
-        <section class="card">
-            <h3 style="margin-bottom: 1.5rem;">Recent Activity</h3>
-            <div id="recentActivity" class="activity-list">
-                <div class="loading-placeholder">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p>Loading recent activity...</p>
+                <div id="placeholder" class="loading-placeholder" style="display: none;">
+                    <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 1rem;"></i>
+                    <h3>Metrics Not Available</h3>
+                    <p>The metrics image could not be loaded.</p>
                 </div>
             </div>
         </section>
@@ -81,7 +42,7 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 JVisualSchool. Built with GitHub API & Love.</p>
+        <p>&copy; 2026 JVisualSchool. Built with GitHub Pages & Metrics.</p>
         <div style="margin-top: 1rem;">
             <a href="https://github.com/jvisualschool"><i class="fab fa-github fa-lg"></i></a>
         </div>
